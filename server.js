@@ -1,10 +1,9 @@
 const express = require('express');
-const ehb = require('express-handlebars')
+const exphb = require('express-handlebars')
 const bodyParser = require('body-parser');
-const logger = require('morgan');
 const mongoose = require('mongoose');
 
-const request = require('request')
+const request = require('request');
 
 // Our scraping tools
 // Axios is a promised-based http library, similar to jQuery's Ajax method
@@ -15,29 +14,29 @@ const cheerio = require('cheerio');
 // Require all models
 const db = require('./models');
 
-const PORT = 3000;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost/mongoHeadlines';
+
+mongoose.Promise = Promise;
+mongoose.connect(MONGODB_URI, {}, err => console.log(err));
+
+const PORT = process.env.PORT || 3000;
 
 // Initialize Express
 const app = express();
 
 // Configure middleware
 
-// Use morgan logger for logging requests
-app.use(logger('dev'));
 // Use body-parser for handling form submissions
 app.use(bodyParser.urlencoded({ extended: true }));
 // Use express.static to serve the public folder as a static directory
 app.use(express.static('public'));
-
-// Connect to the Mongo DB
-mongoose.connect('mongodb://localhost/week18Populater');
 
 // Routes
 
 // A GET route for scraping the echoJS website
 app.get('/scrape', (req, res) => {
   // First, we grab the body of the html with request
-  request.get('http://www.echojs.com/').then((response) => {
+  app.get('http://www.echojs.com/').then((response) => {
     // Then, we load that into cheerio and save it to $ for a shorthand selector
     const $ = cheerio.load(response.data);
 
@@ -62,7 +61,7 @@ app.get('/scrape', (req, res) => {
         })
         .catch(err =>
           // If an error occurred, send it to the client
-          res.json(err), );
+          res.json(err));
     });
 
     // If we were able to successfully scrape and save an Article, send a message to the client

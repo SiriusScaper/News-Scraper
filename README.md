@@ -1,2 +1,2 @@
-# News-Scraper
-A new scraper utilizing mongoDB
+# article-scraper
+Article scraper utilizing mongoDB
